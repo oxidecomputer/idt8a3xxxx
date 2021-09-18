@@ -1,5 +1,5 @@
 [package]
-name = "idt8a3xxx"
+name = "idt8a3xxxx"
 version = "0.1.0"
 authors = ["Bryan Cantrill <bryan@oxide.computer>"]
 edition = "2018"
