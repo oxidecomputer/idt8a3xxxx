@@ -10,7 +10,7 @@
 //! definitions themselves are contained in a RON file that, at build time
 //! via `build.rs`, is turned into the static definition.
 //!
-#[derive(Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Contents {
     Byte,
     Word,
@@ -34,8 +34,12 @@ pub fn page(addr: u16) -> u8 {
     (addr >> 8) as u8
 }
 
+pub fn offset(addr: u16) -> u8 {
+    (addr & 0xff) as u8
+}
+
 impl Contents {
-    fn size(&self) -> u16 {
+    pub fn size(&self) -> u8 {
         match self {
             Contents::Byte => 1,
             Contents::Word => 2,
@@ -51,8 +55,8 @@ impl Contents {
 
 #[derive(Debug, PartialEq)]
 pub struct Payload<'a> {
-    contents: Contents,
-    data: &'a [u8],
+    pub contents: Contents,
+    pub data: &'a [u8],
 }
 
 impl<'a> Payload<'a> {
@@ -70,28 +74,50 @@ impl<'a> Payload<'a> {
     }
 
     pub fn value(&self) -> u64 {
-        let mut rval = 0u64;
+        match self.contents {
+            Contents::Frequency => {
+                let mut m = 0;
+                let mut n = 0;
 
-        for i in 0..self.data.len() {
-            rval |= (self.data[i] as u64) << (i * 8);
+                for i in 0..6 {
+                    m |= (self.data[i] as u64) << (i * 8);
+                }
+
+                for i in 6..8 {
+                    n |= (self.data[i] as u64) << ((i - 6) * 8);
+                }
+
+                if n == 0 {
+                    m
+                } else {
+                    m / n
+                }
+            }
+            _ => {
+                let mut rval = 0u64;
+
+                for i in 0..self.data.len() {
+                    rval |= (self.data[i] as u64) << (i * 8);
+                }
+
+                rval
+            }
         }
-
-        rval
     }
 }
 
 #[derive(Debug)]
 pub struct Register<'a> {
-    name: &'a str,
-    offset: u16,
-    contents: Contents,
+    pub name: &'a str,
+    pub offset: u16,
+    pub contents: Contents,
 }
 
 #[derive(Debug)]
 pub struct Module<'a> {
-    name: &'a str,
-    base: &'a [u16],
-    registers: &'a [Register<'a>],
+    pub name: &'a str,
+    pub base: &'a [u16],
+    pub registers: &'a [Register<'a>],
 }
 
 include!(concat!(env!("OUT_DIR"), "/modules.rs"));
@@ -100,6 +126,7 @@ include!(concat!(env!("OUT_DIR"), "/modules.rs"));
 mod tests {
     extern crate std;
     use super::*;
+    use std::collections::HashSet;
     use std::*;
 
     #[test]
@@ -109,7 +136,7 @@ mod tests {
     }
 
     #[test]
-    fn overlap() {
+    fn address_orthogonality() {
         let modules = modules();
         let mut seen = 0;
 
@@ -125,7 +152,7 @@ mod tests {
 
                 for register in module.registers {
                     let addr = base + register.offset;
-                    let limit = addr + register.contents.size();
+                    let limit = addr + register.contents.size() as u16;
                     assert!(addr >= seen);
                     println!(
                         "0x{:04x} - 0x{:04x}:  {}.{}",
@@ -134,7 +161,24 @@ mod tests {
                         name,
                         register.name
                     );
-                    seen = addr + register.contents.size();
+                    seen = addr + register.contents.size() as u16;
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn register_orthogonality() {
+        let mut regnames = HashSet::new();
+        let modules = modules();
+
+        for module in modules {
+            for register in module.registers {
+                match regnames.insert(register.name) {
+                    false => {
+                        std::panic!("duplicate register {}", register.name);
+                    }
+                    true => {}
                 }
             }
         }

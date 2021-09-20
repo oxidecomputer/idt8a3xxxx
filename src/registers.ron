@@ -219,7 +219,7 @@
     ),
     "DPLL": (
         base: [
-            0xc400, 0xc438, 0xc480, 0xc4b8, 0xc500, 0xc538, 0xc580,
+            0xc3b0, 0xc400, 0xc438, 0xc480, 0xc4b8, 0xc500, 0xc538, 0xc580,
         ],
         registers: [
             (0x00, "DPLL_DCO_INC_DEC_SIZE", Word),
@@ -308,7 +308,7 @@
     ),
     "DPLL_CTRL": (
         base: [ 
-            0xc63c, 0xc680, 0xc6bc, 0xc700, 0xc73c, 0xc780, 0xc7bc,
+            0xc600, 0xc63c, 0xc680, 0xc6bc, 0xc700, 0xc73c, 0xc780, 0xc7bc,
         ],
         registers: [
             (0x00, "DPLL_HS_TIE_RESET", Byte),
@@ -360,7 +360,7 @@
     ),
     "DPLL_PHASE": (
         base: [
-            0xc81c, 0xc820, 0xc824, 0xc828, 0xc82c, 0xc830, 0xc834,
+            0xc818, 0xc81c, 0xc820, 0xc824, 0xc828, 0xc82c, 0xc830, 0xc834,
         ],
         registers: [
             (0x00, "DPLL_WRITE_PH", Word32),
@@ -368,7 +368,7 @@
     ),
     "DPLL_FREQ": (
         base: [
-            0xc840, 0xc848, 0xc850, 0xc858, 0xc860, 0xc868, 0xc870,
+            0xc838, 0xc840, 0xc848, 0xc850, 0xc858, 0xc860, 0xc868, 0xc870,
         ],
         registers: [
             (0x00, "DPLL_WR_FREQ", Word48),
@@ -431,7 +431,7 @@
             (0x00, "OUT_DIV", Word32),
             (0x04, "OUT_DUTY_CYCLE_HIGH", Word32),
             (0x08, "OUT_CTRL_0", Byte),
-            (0x09, "OUT_CTRL_0", Byte),
+            (0x09, "OUT_CTRL_1", Byte),
             (0x0c, "OUT_PHASE_ADJ", Word32),
         ]
     ),
