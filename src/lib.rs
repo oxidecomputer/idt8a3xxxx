@@ -73,6 +73,40 @@ impl<'a> Payload<'a> {
         }
     }
 
+    pub fn into_slice(
+        contents: Contents,
+        value: u64,
+        data: &'a mut [u8],
+    ) -> Option<Self> {
+        let len = contents.size() as usize;
+
+        match contents {
+            Contents::Frequency => {
+                let m = value;
+                let n = 1;
+
+                for i in 0..6 {
+                    data[i] = ((m >> (i * 8)) & 0xff) as u8;
+                }
+
+                for i in 6..8 {
+                    data[i] = ((n >> ((i - 6) * 8)) & 0xff) as u8;
+                }
+            }
+
+            _ => {
+                for i in 0..len {
+                    data[i] = ((value >> (i * 8)) & 0xff) as u8;
+                }
+            }
+        }
+
+        Some(Self {
+            contents: contents,
+            data: &data[0..len],
+        })
+    }
+
     pub fn value(&self) -> u64 {
         match self.contents {
             Contents::Frequency => {
