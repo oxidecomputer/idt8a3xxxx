@@ -50,14 +50,23 @@ pub fn modules() -> &'static [Module<'static>] {{
     for (_, name) in &sorted {
         let module = modules.get(name).unwrap();
 
-        writeln!(
+        write!(
             &mut s,
             r##"
         Module {{
             name: "{}",
-            base: &{:?},
+            base: &["##,
+            name,
+        )?;
+
+        for b in &module.base {
+            write!(&mut s, "0x{:x}, ", b)?;
+        }
+
+        writeln!(
+            &mut s,
+            r##"],
             registers: &["##,
-            name, module.base
         )?;
 
         for r in &module.registers {

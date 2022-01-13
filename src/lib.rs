@@ -34,7 +34,10 @@ pub enum Contents {
 /// is relevant: PAGE_ADDR[16:31] is hardcoded, and PAGE_ADDR[7:0] is
 /// set as part of the I2C transaction.
 ///
-pub const PAGE_ADDR: u8 = 0xfd;
+pub const PAGE_ADDR_7_0: u8 = 0xfc;
+pub const PAGE_ADDR_15_8: u8 = 0xfd;
+pub const PAGE_ADDR_23_16: u8 = 0xfe;
+pub const PAGE_ADDR_31_24: u8 = 0xff;
 
 pub fn page(addr: u16) -> u8 {
     (addr >> 8) as u8
