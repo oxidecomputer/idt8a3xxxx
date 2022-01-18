@@ -136,11 +136,27 @@ impl<'a> Payload<'a> {
                     m / n
                 }
             }
+
+            Contents::TimeOfDay => {
+                // Just return the seconds portion.  This is the time since
+                // the beginning of the PTP epoch, which also corresponds to
+                // the Unix epoch.
+                let mut rval = 0u64;
+
+                for i in 5..self.data.len() {
+                    let shl = ((i - 5) * 8) as u32;
+                    rval |= (self.data[i] as u64).checked_shl(shl).unwrap();
+                }
+
+                rval
+            }
+
             _ => {
                 let mut rval = 0u64;
 
                 for i in 0..self.data.len() {
-                    rval |= (self.data[i] as u64) << (i * 8);
+                    let shl = (i * 8) as u32;
+                    rval |= (self.data[i] as u64).checked_shl(shl).unwrap();
                 }
 
                 rval
@@ -245,5 +261,16 @@ mod tests {
             println!("{:x}", p.value());
             assert_eq!(p.value(), c.1);
         }
+    }
+
+    #[test]
+    fn tod() {
+        use chrono::NaiveDateTime;
+
+        let bytes = [0, 0, 0, 0, 0, 0x00, 0x77, 0x76, 0x5d, 0, 0];
+        let p = Payload::from_slice(Contents::TimeOfDay, &bytes).unwrap();
+
+        let d = NaiveDateTime::from_timestamp(p.value() as i64, 0);
+        assert_eq!(format!("{}", d), "2019-09-09 16:00:00");
     }
 }

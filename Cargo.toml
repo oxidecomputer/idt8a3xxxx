@@ -5,6 +5,9 @@ authors = ["Bryan Cantrill <bryan@oxide.computer>"]
 edition = "2018"
 license = "MPL-2.0"
 
+[dev-dependencies]
+chrono = "0.4"
+
 [build-dependencies]
 ron = "0.6"
 serde = "1.0.126"
